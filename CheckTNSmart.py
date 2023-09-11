@@ -6,11 +6,17 @@ from datetime import datetime, timedelta
 import time
 from bs4 import BeautifulSoup
 import csv
+from webdriver_manager.chrome import ChromeDriverManager
+
 
 def fill_form():
     
     dict = {}
-    with open('TNRainfall28thMay.csv', 'r') as file:
+  
+    #uncomment only if you need to append the data to a previous excel file
+    """
+ 
+    with open('TNRainfallAugust1-20.csv', 'r') as file:
     # Create a CSV reader object
         csv_reader = csv.reader(file)
     
@@ -23,14 +29,15 @@ def fill_form():
                     dict[row[0]]['Rainfall'] += float(row[2])
                 else:
                     dict.update({row[0]: {'District': row[1], 'Rainfall': float(row[2])}})
-
-    startdate = datetime.strptime("29/05/2023", "%d/%m/%Y")
-    enddate = datetime.strptime("29/05/2023", "%d/%m/%Y")
+    
+"""
+    startdate = datetime.strptime("01/09/2023", "%d/%m/%Y")
+    enddate = datetime.strptime("06/09/2023", "%d/%m/%Y")
     
     
 
     while startdate <= enddate:
-        driver = webdriver.Chrome()  # Use Chrome as an example
+        driver = webdriver.Chrome(ChromeDriverManager().install()) #webdriver.Chrome("C:\\Users\\xjose\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.9_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python39\\site-packages\\chromedriver")  # Use Chrome as an example
         driver.get('https://beta-tnsmart.rimes.int/index.php/Rainfall/daily_data')
        
         element = driver.find_element(By.ID, 'date')  # Replace 'regno' with the actual ID of the registration number field
@@ -76,7 +83,7 @@ def fill_form():
         time.sleep(2)
         startdate += timedelta(days=1)
     
-    with open('C:\\Users\\xjose\\OneDrive\\Desktop\\python\\TNRainfall29thMay.csv','w') as f:
+    with open('TNRainfallSeptember.csv','w') as f:
         writer = csv.writer(f)
         
         for key in dict.keys():
