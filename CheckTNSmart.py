@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from datetime import datetime, timedelta
 import time
 from bs4 import BeautifulSoup
@@ -15,27 +17,30 @@ def fill_form():
     dict = {}
   
     #uncomment only if you need to append the data to a previous excel file
-    
 
-#    with open('TNRainfallSeptember.csv', 'r') as file:
+    with open('TNAugustRainfall_292024.csv', 'r') as file:
     # Create a CSV reader object
-#     csv_reader = csv.reader(file)
+        csv_reader = csv.reader(file)
     
     
         # Iterate over each row in the CSV file
-#        for row in csv_reader:
+        for row in csv_reader:
         # Assuming the first column is the key and the second and third columns are the values
-#            if(len(row) > 0):
-#                if row[0] in dict.keys():
-#                    dict[row[0]]['Rainfall'] += float(row[2])
-#                else:
-#                    dict.update({row[0]: {'District': row[1], 'Rainfall': float(row[2])}})
+            if(len(row) > 0):
+                if row[0] in dict.keys():
+                    dict[row[0]]['Rainfall'] += float(row[2])
+                else:
+                    dict.update({row[0]: {'District': row[1], 'Rainfall': float(row[2])}})
 
-    startdate = datetime.strptime("01/10/2023", "%d/%m/%Y")
-    enddate = datetime.strptime("31/10/2023", "%d/%m/%Y")
+    startdate = datetime.strptime("30/08/2024", "%d/%m/%Y")
+    enddate = datetime.strptime("31/08/2024", "%d/%m/%Y")
     
     while startdate <= enddate:
-        driver = webdriver.Chrome(ChromeDriverManager().install()) #webdriver.Chrome("C:\\Users\\xjose\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.9_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python39\\site-packages\\chromedriver")  # Use Chrome as an example
+        #driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="114.0.5735.90").install()),options=options)
+        #driver = webdriver.Chrome(ChromeDriverManager().install()) #webdriver.Chrome("C:\\Users\\xjose\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.9_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python39\\site-packages\\chromedriver")  # Use Chrome as an example
+        options = Options()
+        options.add_experimental_option("detach", True)
+        driver = webdriver.Chrome(options=options)
         driver.get('https://beta-tnsmart.rimes.int/index.php/Rainfall/daily_data')
        
         element = driver.find_element(By.ID, 'date')  # Add date
@@ -67,12 +72,12 @@ def fill_form():
             for row in rows[1:]:
                 # Find all the <td> tags in the row
                 cells = row.find_all(['td', 'th'])
-                if(len(cells) > 1):
-                    if cells[2].get_text() in dict.keys():
-                        dict[cells[2].get_text()]['Rainfall'] += float(cells[3].get_text())
+                if(len(cells) > 4):
+                    if cells[3].get_text() in dict.keys(): #fourth column on web page containing station name
+                        dict[cells[3].get_text()]['Rainfall'] += float(cells[4].get_text()) #insert rainfall information for new station
                     else:
-                        dict.update({cells[2].get_text(): {'District': cells[1].get_text(), 'Rainfall': float(cells[3].get_text())}})
-                #print(cells[1].get_text() + " "+ cells[2].get_text() + " "+ cells[3].get_text())
+                        dict.update({cells[3].get_text(): {'District': cells[2].get_text(), 'Rainfall': float(cells[4].get_text())}}) #add to existing tally
+                    print(cells[0].get_text() + " "+ cells[1].get_text() + " "+ cells[2].get_text()+" "+cells[3].get_text()+" "+cells[4].get_text())
                 # Iterate through the cells, starting from the second one
                 #for cell in cells[1:]:
                 # Print the cell contents
@@ -87,7 +92,7 @@ def fill_form():
         time.sleep(2)
         startdate += timedelta(days=1)
     
-    with open('TNRainfallOctober.csv','w') as f:
+    with open('TNAugustRainfall_2024.csv','w') as f:
         writer = csv.writer(f)
         
         for key in dict.keys():
