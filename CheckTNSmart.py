@@ -15,10 +15,18 @@ from selenium.webdriver.support.ui import Select
 def fill_form():
     
     dict = {}
+    file_to_append = 'TNNovemberRainfall_till08_2024.csv'
+    file_to_save = 'TNNovemberRainfall_till18_2024.csv'
+    start_date = "09/11/2024"
+    end_date = "18/11/2024"
+    parse_link = 'https://beta-tnsmart.rimes.int/index.php/Rainfall/daily_data'
+    
   
     #uncomment only if you need to append the data to a previous excel file
-
-    with open('TNAugustRainfall_292024.csv', 'r') as file:
+    startdate = datetime.strptime(start_date, "%d/%m/%Y")
+    enddate = datetime.strptime(end_date, "%d/%m/%Y")
+    
+    with open(file_to_append, 'r') as file:
     # Create a CSV reader object
         csv_reader = csv.reader(file)
     
@@ -31,17 +39,14 @@ def fill_form():
                     dict[row[0]]['Rainfall'] += float(row[2])
                 else:
                     dict.update({row[0]: {'District': row[1], 'Rainfall': float(row[2])}})
-
-    startdate = datetime.strptime("30/08/2024", "%d/%m/%Y")
-    enddate = datetime.strptime("31/08/2024", "%d/%m/%Y")
+     
     
     while startdate <= enddate:
         #driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="114.0.5735.90").install()),options=options)
-        #driver = webdriver.Chrome(ChromeDriverManager().install()) #webdriver.Chrome("C:\\Users\\xjose\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.9_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python39\\site-packages\\chromedriver")  # Use Chrome as an example
         options = Options()
         options.add_experimental_option("detach", True)
         driver = webdriver.Chrome(options=options)
-        driver.get('https://beta-tnsmart.rimes.int/index.php/Rainfall/daily_data')
+        driver.get(parse_link)
        
         element = driver.find_element(By.ID, 'date')  # Add date
         element.send_keys(startdate.strftime("%d/%m/%Y")) 
@@ -49,8 +54,6 @@ def fill_form():
         dropdown = Select(drop_down_element)
         dropdown.select_by_visible_text("Rainfall wise")
 
-        
-    #for i in range(1000000, 10000000):
     # Create a dictionary with the form data
         submit_button = driver.find_element(By.CSS_SELECTOR, 'input[type="submit"]')  #Replace with the appropriate CSS selector for the submit button
         submit_button.click()
@@ -92,7 +95,7 @@ def fill_form():
         time.sleep(2)
         startdate += timedelta(days=1)
     
-    with open('TNAugustRainfall_2024.csv','w') as f:
+    with open(file_to_save,'w') as f:
         writer = csv.writer(f)
         
         for key in dict.keys():
